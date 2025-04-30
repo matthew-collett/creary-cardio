@@ -1,0 +1,28 @@
+@import 'tailwindcss';
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: inherit;
+}
+
+html,
+body {
+  height: 100%;
+  width: 100%;
+}
+
+:root {
+  --colour-primary: #01418e;
+  --colour-primary-light: #96afd6;
+
+  --colour-accent: #e75134;
+  --colour-accent-light: #f7b9b1;
+
+  --colour-background: #f2f0ea;
+  --colour-background-alt: #f4d8d4;
+
+  --colour-text: #333333;
+  --colour-text-light: #666666;
+}

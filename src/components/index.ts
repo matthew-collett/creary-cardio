@@ -1,2 +1,6 @@
 export * from './GenericError'
 export * from './Loader'
+export * from './Sidebar'
+export * from './Header'
+export * from './DefaultProfilePhoto'
+export * from './PageTitle'

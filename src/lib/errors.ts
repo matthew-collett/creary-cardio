@@ -17,7 +17,7 @@ export const handleError = (error: unknown): string => {
   return 'Something went wrong. Please try again or contact support if the issue persists.'
 }
 
-const handleFirebaseError = (error: FirebaseError): string => {
+export const handleFirebaseError = (error: FirebaseError): string => {
   switch (error.code) {
     // Common login/registration errors
     case 'auth/invalid-credential':
@@ -56,7 +56,10 @@ const handleFirebaseError = (error: FirebaseError): string => {
     case 'auth/internal-error':
       return 'Authentication service encountered an error. Please try again.'
 
+    case 'permission-denied':
+      return 'You do not have permission to perform this action.'
+
     default:
-      return `Authentication error: ${error.message}`
+      return `Firebase error: ${error.message}`
   }
 }

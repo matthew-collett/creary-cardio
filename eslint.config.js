@@ -33,18 +33,19 @@ export default tseslint.config(
       'import': eslintPluginImport,
     },
     rules: {
-      'prefer-arrow-callback': ['error'],
-      'func-style': ['error', 'expression', { allowArrowFunctions: true }],
       ...js.configs.recommended.rules,
       ...pluginReact.configs.recommended.rules,
       ...pluginReact.configs['jsx-runtime'].rules,
       ...reactHooks.configs.recommended.rules,
+      ...prettierConfig.rules,
+      'no-unused-vars': 'off',
+      'prefer-arrow-callback': ['error'],
+      'func-style': ['error', 'expression', { allowArrowFunctions: true }],
       'react-refresh/only-export-components': 'off',
       'react/jsx-no-target-blank': 'off',
       '@typescript-eslint/no-non-null-assertion': 'off',
       'react/prop-types': 'off',
       'prettier/prettier': ['error'],
-      ...prettierConfig.rules,
       'import/order': [
         'error',
         {

@@ -1,19 +1,25 @@
+import { MantineProvider } from '@mantine/core'
 import { Suspense, StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { RouterProvider } from 'react-router-dom'
 
-import { Loader } from '@/components'
+import { LoadingScreen } from '@/components'
 import { router } from '@/config'
 import { AuthProvider } from '@/context'
+import { theme } from '@/theme'
 
-import './index.css'
+import '@/index.css'
+import '@mantine/core/styles.css'
+import '@mantine/dates/styles.css'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <AuthProvider>
-      <Suspense fallback={<Loader />}>
-        <RouterProvider router={router} />
-      </Suspense>
-    </AuthProvider>
+    <MantineProvider theme={theme}>
+      <AuthProvider>
+        <Suspense fallback={<LoadingScreen />}>
+          <RouterProvider router={router} />
+        </Suspense>
+      </AuthProvider>
+    </MantineProvider>
   </StrictMode>,
 )

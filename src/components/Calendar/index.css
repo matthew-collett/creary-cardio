@@ -1,0 +1,43 @@
+:root {
+  --sx-color-primary: var(--color-accent);
+  --sx-color-primary-container: var(--color-accent-light);
+  --sx-color-on-primary-container: var(--color-text);
+  --sx-internal-color-text: var(--color-text);
+  --sx-color-surface-dim: var(--color-accent-0);
+  --sx-rounding-small: var(--radius);
+  --sx-rounding-extra-small: var(--radius);
+  --sx-calendar-calculated-height: calc(100vh - 48px - 32px - 40.8px - 78px);
+}
+
+.sx__month-grid-day__events {
+  margin: 1px;
+}
+
+.sx__calendar-wrapper {
+  /* 100vh - xy padding above card - xy padding below card - header - page title */
+  height: var(--sx-calendar-calculated-height);
+}
+
+.sx__time-grid-event {
+  border-radius: 4px;
+}
+
+.sx__month-grid-event {
+  border-radius: 4px;
+}
+
+.sx__event-icon {
+  margin-inline-end: 2px;
+}
+
+.sx__date-picker-popup {
+  border-radius: var(--radius);
+}
+
+.sx__week-grid__date {
+  gap: 0;
+}
+
+.sx__current-time-indicator {
+  background-color: var(--sx-color-primary);
+}

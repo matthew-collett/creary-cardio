@@ -1,3 +1,1 @@
-export const GenericError = () => {
-  return <div>An unexpected error occurred. Please try again.</div>
-}
+export const GenericError = () => <div>An unexpected error occurred. Please try again.</div>

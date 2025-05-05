@@ -1,28 +1,193 @@
 @import 'tailwindcss';
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: inherit;
-}
-
-html,
-body {
-  height: 100%;
-  width: 100%;
-}
-
 :root {
-  --colour-primary: #01418e;
-  --colour-primary-light: #96afd6;
+  --font-primary: 'Gliker', sans-serif;
 
-  --colour-accent: #e75134;
-  --colour-accent-light: #f7b9b1;
+  --color-primary-0: #edf3ff;
+  --color-primary-1: #ccd9f2;
+  --color-primary-2: #a7bee4;
+  --color-primary-3: #96afd6;
+  --color-primary-4: #6f93c8;
+  --color-primary-5: #4778ba;
+  --color-primary-6: #01418e;
+  --color-primary-7: #013778;
+  --color-primary-8: #012d62;
+  --color-primary-9: #00234c;
 
-  --colour-background: #f2f0ea;
-  --colour-background-alt: #f4d8d4;
+  --color-accent-0: #fff1f0;
+  --color-accent-1: #ffe0dc;
+  --color-accent-2: #ffd0ca;
+  --color-accent-3: #f7b9b1;
+  --color-accent-4: #f29686;
+  --color-accent-5: #ed745d;
+  --color-accent-6: #e75134;
+  --color-accent-7: #d43e21;
+  --color-accent-8: #b7331b;
+  --color-accent-9: #9a2916;
 
-  --colour-text: #333333;
-  --colour-text-light: #666666;
+  --color-background: #f2f0ea;
+  --color-background-alt: #f4d8d4;
+
+  --color-text: #333333;
+  --color-text-light: var(--color-background);
+  --color-border: #ced4db;
+
+  --radius: 24px;
+}
+
+@theme {
+  --default-font-family: 'Gliker', sans-serif;
+
+  --color-primary-0: var(--color-primary-0);
+  --color-primary-1: var(--color-primary-1);
+  --color-primary-2: var(--color-primary-2);
+  --color-primary-3: var(--color-primary-3);
+  --color-primary-4: var(--color-primary-4);
+  --color-primary-5: var(--color-primary-5);
+  --color-primary-6: var(--color-primary-6);
+  --color-primary-7: var(--color-primary-7);
+  --color-primary-8: var(--color-primary-8);
+  --color-primary-9: var(--color-primary-9);
+
+  --color-accent-0: var(--color-accent-0);
+  --color-accent-1: var(--color-accent-1);
+  --color-accent-2: var(--color-accent-2);
+  --color-accent-3: var(--color-accent-3);
+  --color-accent-4: var(--color-accent-4);
+  --color-accent-5: var(--color-accent-5);
+  --color-accent-6: var(--color-accent-6);
+  --color-accent-7: var(--color-accent-7);
+  --color-accent-8: var(--color-accent-8);
+  --color-accent-9: var(--color-accent-9);
+
+  --color-primary: var(--color-primary-6);
+  --color-primary-light: var(--color-primary-3);
+  --color-accent: var(--color-accent-6);
+  --color-accent-light: var(--color-accent-3);
+  --color-background: var(--color-background);
+  --color-background-alt: var(--color-background-alt);
+  --color-text: var(--color-text);
+  --color-text-light: var(--color-text-light);
+  --color-border: var(--color-border);
+
+  --radius-radius: var(--radius);
+}
+
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  html,
+  body,
+  h1,
+  h2,
+  h3,
+  h4,
+  p,
+  figure,
+  blockquote,
+  dl,
+  dd {
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    min-height: 100vh;
+    text-rendering: optimizeSpeed;
+    line-height: 1.5;
+    font-family: var(--font-primary);
+    color: var(--color-text);
+    background-color: var(--color-background);
+  }
+
+  img,
+  picture {
+    max-width: 100%;
+    display: block;
+  }
+
+  input,
+  button,
+  textarea,
+  select {
+    font: inherit;
+  }
+
+  a {
+    color: var(--color-primary-6);
+    text-decoration: none;
+    transition: all 200ms ease-in-out;
+  }
+
+  a:hover {
+    color: var(--color-primary-5);
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+@font-face {
+  font-family: 'Gliker';
+  src: url('@/assets/fonts/Gliker-Bold.eot');
+  src:
+    local('Gliker Bold'),
+    local('Gliker-Bold'),
+    url('@/assets/fonts/Gliker-Bold.eot?#iefix') format('embedded-opentype'),
+    url('@/assets/fonts/Gliker-Bold.woff2') format('woff2'),
+    url('@/assets/fonts/Gliker-Bold.woff') format('woff'),
+    url('@/assets/fonts/Gliker-Bold.ttf') format('truetype');
+  font-weight: bold;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Gliker';
+  src: url('@/assets/fonts/Gliker-Black.eot');
+  src:
+    local('Gliker Black'),
+    local('Gliker-Black'),
+    url('@/assets/fonts/Gliker-Black.eot?#iefix') format('embedded-opentype'),
+    url('@/assets/fonts/Gliker-Black.woff2') format('woff2'),
+    url('@/assets/fonts/Gliker-Black.woff') format('woff'),
+    url('@/assets/fonts/Gliker-Black.ttf') format('truetype');
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Gliker';
+  src: url('@/assets/fonts/Gliker-SemiBold.eot');
+  src:
+    local('Gliker SemiBold'),
+    local('Gliker-SemiBold'),
+    url('@/assets/fonts/Gliker-SemiBold.eot?#iefix') format('embedded-opentype'),
+    url('@/assets/fonts/Gliker-SemiBold.woff2') format('woff2'),
+    url('@/assets/fonts/Gliker-SemiBold.woff') format('woff'),
+    url('@/assets/fonts/Gliker-SemiBold.ttf') format('truetype');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Gliker';
+  src: url('@/assets/fonts/Gliker-Regular.eot');
+  src:
+    local('Gliker Regular'),
+    local('Gliker-Regular'),
+    url('@/assets/fonts/Gliker-Regular.eot?#iefix') format('embedded-opentype'),
+    url('@/assets/fonts/Gliker-Regular.woff2') format('woff2'),
+    url('@/assets/fonts/Gliker-Regular.woff') format('woff'),
+    url('@/assets/fonts/Gliker-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
 }

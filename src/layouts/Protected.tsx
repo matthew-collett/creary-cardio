@@ -1,13 +1,13 @@
 import { Navigate, Outlet } from 'react-router-dom'
 
-import { Loader } from '@/components'
+import { LoadingScreen } from '@/components'
 import { useAuth } from '@/context'
 
 const Protected = () => {
-  const { user, loading } = useAuth()
+  const { user, authLoading } = useAuth()
 
-  if (loading) {
-    return <Loader />
+  if (authLoading) {
+    return <LoadingScreen />
   }
 
   if (!user) {

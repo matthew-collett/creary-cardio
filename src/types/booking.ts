@@ -6,7 +6,8 @@ export type Booking = {
   title: string
   start: Timestamp
   end: Timestamp
-  description?: string
+  description: string | null
+  rrule: string | null
   createdAt: Timestamp
   updatedAt: Timestamp
 }

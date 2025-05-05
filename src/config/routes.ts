@@ -1,3 +1,4 @@
+import { Icon, IconHome, IconSettings } from '@tabler/icons-react'
 import { Location, RouteObject } from 'react-router-dom'
 
 interface Route {
@@ -5,6 +6,10 @@ interface Route {
   path: string
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   component: () => Promise<any>
+}
+
+interface AppRoute extends Route {
+  icon: Icon
 }
 
 const publicRoutes: Route[] = [
@@ -20,15 +25,31 @@ const publicRoutes: Route[] = [
   },
 ]
 
-const protectedRoutes: Route[] = [
+const navRoutes: AppRoute[] = [
   {
     title: 'Home',
     path: '',
+    icon: IconHome,
     component: () => import('@/pages/Home'),
+  },
+  {
+    title: 'Settings',
+    path: 'settings',
+    icon: IconSettings,
+    component: () => import('@/pages/Settings'),
   },
 ]
 
-export const routes = [...publicRoutes, ...protectedRoutes]
+const protectedRoutes: Route[] = [
+  ...navRoutes,
+  {
+    title: 'Account',
+    path: 'account',
+    component: () => import('@/pages/Account'),
+  },
+]
+
+export const routes = [...publicRoutes, ...protectedRoutes, ...navRoutes]
 
 export const getTitle = (location: Location): string | undefined => {
   return getRoute(location)?.title
@@ -49,5 +70,5 @@ export const createRouteConfig = (route: Route): RouteObject => ({
   lazy: route.component,
 })
 
-export type { Route }
-export { protectedRoutes, publicRoutes }
+export type { Route, AppRoute }
+export { protectedRoutes, publicRoutes, navRoutes }

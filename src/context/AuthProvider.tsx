@@ -8,94 +8,115 @@ import { Timestamp } from 'firebase/firestore'
 import { createContext, useState, useEffect, useContext, ReactNode } from 'react'
 
 import { auth, handleError } from '@/lib'
-import { userService } from '@/services'
+import { userService } from '@/lib/services'
 import { User } from '@/types'
 
 interface AuthContextType {
   user: User | null
-  loading: boolean
+  authLoading: boolean
+  actionLoading: boolean
   error: string | null
-  // eslint-disable-next-line no-unused-vars
-  signIn: (email: string, password: string) => Promise<void>
+  clearError: () => void
+  login: (email: string, password: string) => Promise<void>
   logout: () => Promise<void>
-  // eslint-disable-next-line no-unused-vars
-  updateUser: (data: Partial<User>) => Promise<void>
-  // eslint-disable-next-line no-unused-vars
-  resetPassword: (email: string) => Promise<void>
+  updateUser: (data: Partial<User>) => Promise<boolean>
+  resetPassword: (email: string) => Promise<boolean>
 }
 
 const AuthContext = createContext<AuthContextType | null>(null)
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null)
-  const [loading, setLoading] = useState<boolean>(true)
+  const [authLoading, setAuthLoading] = useState<boolean>(true)
+  const [actionLoading, setActionLoading] = useState<boolean>(false)
   const [error, setError] = useState<string | null>(null)
 
-  const signIn = async (email: string, password: string) => {
+  const login = async (email: string, password: string) => {
+    setActionLoading(true)
+    setError(null)
     try {
-      setError(null)
       await signInWithEmailAndPassword(auth, email, password)
     } catch (error) {
       setError(handleError(error))
+    } finally {
+      setActionLoading(false)
     }
   }
 
   const logout = async () => {
+    setActionLoading(true)
+    setError(null)
     try {
-      setError(null)
       await signOut(auth)
     } catch (error) {
       setError(handleError(error))
+    } finally {
+      setActionLoading(false)
     }
   }
 
-  const resetPassword = async (email: string) => {
+  const resetPassword = async (email: string): Promise<boolean> => {
+    setActionLoading(true)
+    setError(null)
     try {
-      setError(null)
       await sendPasswordResetEmail(auth, email)
+      return true
     } catch (error) {
       setError(handleError(error))
+    } finally {
+      setActionLoading(false)
     }
+    return false
   }
 
-  const updateUser = async (data: Partial<User>) => {
+  const updateUser = async (data: Partial<User>): Promise<boolean> => {
+    setActionLoading(true)
+    setError(null)
+
     if (!user) {
-      return
+      return false
     }
 
     try {
-      setError(null)
       const updatedUser = await userService.updateUser(user.uid, {
         ...data,
         updatedAt: Timestamp.now(),
       })
 
       setUser(updatedUser)
+      return true
     } catch (error) {
       setError(handleError(error))
+    } finally {
+      setActionLoading(false)
     }
+    return false
   }
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async user => {
-      if (!user) {
-        setUser(null)
-        setLoading(false)
-        return
+    return onAuthStateChanged(auth, async fbUser => {
+      try {
+        setAuthLoading(true)
+        if (!fbUser) {
+          setUser(null)
+          setAuthLoading(false)
+          return
+        }
+        const dbUser = await userService.getUser(fbUser.uid)
+        setUser(dbUser)
+      } finally {
+        setAuthLoading(false)
       }
-
-      const currentUser = await userService.getUser(user.uid)
-      setUser(currentUser)
     })
-
-    return () => unsubscribe()
   }, [])
 
   const value = {
     user,
-    loading,
+    authLoading,
+    actionLoading,
     error,
-    signIn,
+    clearError: () => setError(null),
+    login,
     updateUser,
     logout,
     resetPassword,

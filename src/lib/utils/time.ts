@@ -31,6 +31,14 @@ export const formatTime24 = ({ time, period }: Time12): string => {
   return `${hours24.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`
 }
 
+export const midnight = (d: Date): Date => {
+  const newDate = new Date(d)
+  newDate.setHours(0, 0, 0, 0)
+  return newDate
+}
+
+export const today = new Date()
+
 export const addDays = (d: Date, days: number): Date => new Date(d.getTime() + days * 86400000)
 
 export const addHours = (d: Date, hours: number): Date => new Date(d.getTime() + hours * 3600000)

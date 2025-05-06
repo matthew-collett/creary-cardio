@@ -6,7 +6,12 @@
   --sx-color-surface-dim: var(--color-accent-0);
   --sx-rounding-small: var(--radius);
   --sx-rounding-extra-small: var(--radius);
+  /* 100vh - xy padding above card - xy padding below card - header - page title */
   --sx-calendar-calculated-height: calc(100vh - 48px - 32px - 40.8px - 78px);
+}
+
+.sx__event:hover {
+  cursor: pointer;
 }
 
 .sx__month-grid-day__events {
@@ -14,7 +19,6 @@
 }
 
 .sx__calendar-wrapper {
-  /* 100vh - xy padding above card - xy padding below card - header - page title */
   height: var(--sx-calendar-calculated-height);
 }
 

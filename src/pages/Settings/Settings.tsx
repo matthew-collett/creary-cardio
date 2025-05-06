@@ -1,20 +1,20 @@
 import { useForm } from '@mantine/form'
 import { IconSettings } from '@tabler/icons-react'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { Navigate } from 'react-router-dom'
 
 import { Loader, PageTitle } from '@/components'
-import { Button, Alert, Card, TextInput, Select } from '@/components/core'
+import { Button, Card, TextInput, Select, Alert } from '@/components/core'
+import { showSuccess } from '@/components/Notification'
 import { useAuth } from '@/context'
 import { useSettings } from '@/hooks'
-import { formatTime12, formatTime24, Time12, timeToMinutes } from '@/lib'
+import { formatTime12, formatTime24, Time12, timeToMinutes } from '@/lib/utils'
 
 const timeRegex = /^([1-9]|1[0-2]):[0-5]\d$/
 
 const Settings = () => {
   const { user } = useAuth()
-  const { settings, initialLoading, actionLoading, error, updateSettings } = useSettings()
-  const [saved, setSaved] = useState(false)
+  const { settings, initialLoading, actionLoading, updateSettings } = useSettings()
 
   const form = useForm<{
     opening: Time12
@@ -46,7 +46,7 @@ const Settings = () => {
     },
   })
 
-  const { setValues, getInputProps, onSubmit, setErrors } = form
+  const { setValues } = form
 
   useEffect(() => {
     if (settings) {
@@ -59,41 +59,38 @@ const Settings = () => {
     }
   }, [settings, setValues])
 
-  if (!user) return <Navigate to="/login" replace />
+  if (!user) {
+    return <Navigate to="/login" replace />
+  }
 
-  const handleSubmit = onSubmit(async values => {
-    const openMin = timeToMinutes(
-      formatTime24({ time: values.opening.time, period: values.opening.period }),
-    )
-    const closeMin = timeToMinutes(
-      formatTime24({ time: values.closing.time, period: values.closing.period }),
-    )
+  const handleSubmit = form.onSubmit(async values => {
+    const openMin = timeToMinutes(formatTime24(values.opening))
+    const closeMin = timeToMinutes(formatTime24(values.closing))
     if (closeMin <= openMin) {
-      setErrors({
+      form.setErrors({
         closing: 'Must be after opening time',
       })
       return
     }
 
-    const ok = await updateSettings({
-      openingTime: formatTime24({ time: values.opening.time, period: values.opening.period }),
-      closingTime: formatTime24({ time: values.closing.time, period: values.closing.period }),
+    const { success, error } = await updateSettings({
+      openingTime: formatTime24(values.opening),
+      closingTime: formatTime24(values.closing),
       maxDurationMinutes: values.maxDuration,
       advanceBookingDays: values.advanceDays,
     })
 
-    if (ok) {
-      setSaved(true)
-      setTimeout(() => setSaved(false), 3000)
+    if (!success) {
+      form.setErrors({ form: error })
+      return
     }
+    showSuccess('Settings updated!')
   })
 
   return (
     <>
       <PageTitle icon={<IconSettings size="1.25em" />} title="Calendar Settings" />
       <Card className="bg-white">
-        {error && <Alert error>{error}</Alert>}
-        {saved && <Alert>Settings saved!</Alert>}
         <div className="min-h-[315px] flex items-center justify-center">
           {initialLoading ? (
             <Loader />
@@ -106,7 +103,7 @@ const Settings = () => {
                     label={field === 'opening' ? 'Opening Time' : 'Closing Time'}
                     placeholder={field === 'opening' ? '7:00' : '9:00'}
                     className="flex-1"
-                    {...getInputProps(`${field}.time`)}
+                    {...form.getInputProps(`${field}.time`)}
                   />
                   <Select
                     withAsterisk
@@ -115,24 +112,23 @@ const Settings = () => {
                       { value: 'AM', label: 'AM' },
                       { value: 'PM', label: 'PM' },
                     ]}
-                    {...getInputProps(`${field}.period`)}
+                    {...form.getInputProps(`${field}.period`)}
                   />
                 </div>
               ))}
-
               <TextInput
                 withAsterisk
                 label="Maximum Duration (minutes)"
                 placeholder="120"
-                {...getInputProps('maxDuration')}
+                {...form.getInputProps('maxDuration')}
               />
-
               <TextInput
                 withAsterisk
                 label="Advance Booking Days"
                 placeholder="7"
-                {...getInputProps('advanceDays')}
+                {...form.getInputProps('advanceDays')}
               />
+              {form.errors.form && <Alert error>{form.errors.form}</Alert>}
 
               <Button type="submit" loading={actionLoading}>
                 Save Settings

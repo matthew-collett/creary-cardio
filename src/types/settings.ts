@@ -1,19 +1,18 @@
-import { Timestamp } from 'firebase/firestore'
+import { Resource } from '@/types'
 
-export type Settings = {
+export type Settings = Resource & {
   openingTime: string
   closingTime: string
   maxDurationMinutes: number
   advanceBookingDays: number
-  updatedAt: Timestamp
 }
+
+export type IsAllowed = { allowed: true } | { allowed: false; reason: string }
 
 /* TODO
 - be able to update and delete bookings
-- modularize that fucking page somehow
 - make account page
 --- need to do update password, also custom password reset form with cool redirect in 3. 2. 1....
 - add other users
 - deploy
-
 */

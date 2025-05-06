@@ -5,13 +5,13 @@ import { useNavigate } from 'react-router-dom'
 import logo from '@/assets/logo.svg'
 import { Button, LinkButton } from '@/components/core'
 import { Alert, Card, PasswordInput, TextInput } from '@/components/core'
+import { showSuccess } from '@/components/Notification'
 import { useAuth } from '@/context'
 
 const Login = () => {
   const navigate = useNavigate()
   const [isResetMode, setIsResetMode] = useState<boolean>(false)
-  const [resetSent, setResetSent] = useState<boolean>(false)
-  const { user, login, resetPassword, actionLoading, error, clearError } = useAuth()
+  const { user, login, resetPassword, actionLoading } = useAuth()
   const form = useForm({
     initialValues: {
       email: '',
@@ -31,21 +31,24 @@ const Login = () => {
 
   const handleSubmit = form.onSubmit(async vals => {
     if (isResetMode) {
-      const success = await resetPassword(vals.email)
-      if (success) {
-        setResetSent(true)
-        setTimeout(() => setResetSent(false), 3000)
+      const { success, error } = await resetPassword(vals.email)
+      if (!success) {
+        form.setErrors({ form: error })
+        return
       }
+
+      showSuccess('Reset email sent!')
+    }
+    const { success, error } = await login(vals.email, vals.password)
+    if (!success) {
+      form.setErrors({ form: error })
       return
     }
-    await login(vals.email, vals.password)
     form.reset()
   })
 
   const toggleResetMode = () => {
     setIsResetMode(!isResetMode)
-    setResetSent(false)
-    clearError()
   }
 
   return (
@@ -63,8 +66,7 @@ const Login = () => {
           </p>
         </div>
         <div className="py-4 sm:py-6 sm:px-6">
-          {error && <Alert error>{error}</Alert>}
-          {resetSent && <Alert>Reset link has been sent to your email!</Alert>}
+          {form.errors.form && <Alert error>{form.errors.form}</Alert>}
           <form onSubmit={handleSubmit} className="space-y-4">
             <TextInput
               withAsterisk

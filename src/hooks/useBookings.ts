@@ -1,17 +1,15 @@
 import { useState, useEffect, useCallback } from 'react'
 
 import { useAuth } from '@/context'
-import { handleError } from '@/lib'
 import { bookingService, settingsService } from '@/lib/services'
-import { Booking } from '@/types'
+import { Booking, IsAllowed, NewResource, ServiceResponse, UpdatedResource } from '@/types'
 
 export const useBookings = () => {
   const { user } = useAuth()
   const [bookings, setBookings] = useState<Booking[]>([])
   const [initialLoading, setInitialLoading] = useState<boolean>(true)
-  const [counts, setCounts] = useState({ past: 0, upcoming: 0 })
   const [actionLoading, setActionLoading] = useState<boolean>(false)
-  const [error, setError] = useState<string | null>(null)
+  const [counts, setCounts] = useState({ past: 0, upcoming: 0 })
 
   const fetchBookings = useCallback(async () => {
     if (!user) {
@@ -19,16 +17,13 @@ export const useBookings = () => {
     }
 
     setInitialLoading(true)
-    setError(null)
-
-    try {
-      const bookings = await bookingService.getAllBookings()
-      setBookings(bookings)
-    } catch (error) {
-      setError(handleError(error))
-    } finally {
-      setInitialLoading(false)
+    const response = await bookingService.list()
+    if (response.success) {
+      setBookings(response.data)
     }
+
+    setInitialLoading(false)
+    return response
   }, [user])
 
   const fetchCounts = useCallback(async () => {
@@ -36,15 +31,21 @@ export const useBookings = () => {
       return
     }
 
-    try {
-      const [pastCount, upcomingCount] = await Promise.all([
-        bookingService.getUserPastBookingsCount(user.uid),
-        bookingService.getUserUpcomingBookingsCount(user.uid),
-      ])
-      setCounts({ past: pastCount, upcoming: upcomingCount })
-    } catch (error) {
-      setError(handleError(error))
+    setInitialLoading(true)
+    const [pastResponse, upcomingResponse] = await Promise.all([
+      bookingService.getUserPastBookingsCount(user.id),
+      bookingService.getUserUpcomingBookingsCount(user.id),
+    ])
+
+    if (pastResponse.success && upcomingResponse.success) {
+      setCounts({
+        past: pastResponse.data,
+        upcoming: upcomingResponse.data,
+      })
     }
+
+    setInitialLoading(false)
+    return { pastResponse, upcomingResponse }
   }, [user])
 
   useEffect(() => {
@@ -59,86 +60,90 @@ export const useBookings = () => {
     return () => unsubscribe()
   }, [fetchBookings, fetchCounts])
 
-  const createBooking = async (booking: Omit<Booking, 'id' | 'createdAt' | 'updatedAt'>) => {
-    try {
-      setActionLoading(true)
-      setError(null)
-      const bookingId = await bookingService.createBooking(booking)
-      return bookingId
-    } catch (error) {
-      setError(handleError(error))
-    } finally {
-      setActionLoading(false)
+  const createBooking = async (booking: NewResource<Booking>) => {
+    setActionLoading(true)
+    const response = await bookingService.create(booking)
+    setActionLoading(false)
+
+    if (response.success) {
+      fetchBookings()
     }
+
+    return response
   }
 
-  const updateBooking = async (
-    id: string,
-    data: Partial<Omit<Booking, 'id' | 'createdAt' | 'updatedAt'>>,
-  ) => {
-    try {
-      setActionLoading(true)
-      setError(null)
-      const updatedBooking = await bookingService.updateBooking(id, data)
-      return updatedBooking
-    } catch (error) {
-      setError(handleError(error))
-    } finally {
-      setActionLoading(false)
+  const updateBooking = async (id: string, booking: UpdatedResource<Booking>) => {
+    setActionLoading(true)
+    const response = await bookingService.update(id, booking)
+    setActionLoading(false)
+
+    if (response.success) {
+      fetchBookings()
     }
+
+    return response
   }
 
   const deleteBooking = async (id: string) => {
-    try {
-      setActionLoading(true)
-      setError(null)
-      await bookingService.deleteBooking(id)
-      return true
-    } catch (error) {
-      setError(handleError(error))
-      throw error
-    } finally {
-      setActionLoading(false)
+    setActionLoading(true)
+    const response = await bookingService.delete(id)
+    setActionLoading(false)
+
+    if (response.success) {
+      fetchBookings()
     }
+
+    return response
   }
 
-  const validateBooking = async (start: Date, end: Date) => {
-    try {
-      setActionLoading(true)
-      setError(null)
+  const validateBooking = async (start: Date, end: Date): Promise<ServiceResponse<IsAllowed>> => {
+    setActionLoading(true)
 
-      const isAllowed = await settingsService.isBookingAllowed(start, end)
-      if (!isAllowed.allowed) {
-        return isAllowed
-      }
+    const settingsResponse = await settingsService.isBookingAllowed(start, end)
 
-      const isAvailable = await bookingService.isTimeAvailable(start, end)
-      if (!isAvailable) {
-        return {
+    if (!settingsResponse.success) {
+      setActionLoading(false)
+      return settingsResponse
+    }
+
+    if (!settingsResponse.data.allowed) {
+      setActionLoading(false)
+      return settingsResponse
+    }
+
+    const availabilityResponse = await bookingService.isTimeAvailable(start, end)
+
+    setActionLoading(false)
+
+    if (!availabilityResponse.success) {
+      return availabilityResponse
+    }
+
+    if (!availabilityResponse.data) {
+      return {
+        success: true,
+        data: {
           allowed: false,
           reason: 'This time slot is already booked',
-        }
+        },
       }
-
-      return { allowed: true }
-    } catch (error) {
-      setError(handleError(error))
-    } finally {
-      setActionLoading(false)
     }
-    return { allowed: false, reason: 'Error while validating booking' }
+
+    return {
+      success: true,
+      data: { allowed: true },
+    }
   }
 
   return {
     bookings,
+    counts,
+    initialLoading,
+    actionLoading,
     createBooking,
     updateBooking,
     deleteBooking,
     validateBooking,
-    counts,
-    initialLoading,
-    actionLoading,
-    error,
     refetch: fetchBookings,
   }
 }

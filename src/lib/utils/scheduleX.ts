@@ -15,7 +15,14 @@ export const toScheduleXDate = (d: Date) => {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
 }
 
-export const fromScheduleXDate = (scheduleXDate: string): Date => new Date(scheduleXDate)
+export const fromScheduleXDateTime = (dt: string): Date => new Date(dt)
+
+export const fromScheduleXDate = (d: string): Date => {
+  const [year, month, day] = d.split('-').map(Number)
+  const date = new Date(year, month - 1, day)
+  date.setHours(7, 0, 0, 0)
+  return date
+}
 
 export const toScheduleXEvent = (
   booking: Booking,

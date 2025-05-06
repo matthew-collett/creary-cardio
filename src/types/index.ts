@@ -1,3 +1,5 @@
 export * from './user'
 export * from './booking'
 export * from './settings'
+export * from './resource'
+export * from './serviceResponse'

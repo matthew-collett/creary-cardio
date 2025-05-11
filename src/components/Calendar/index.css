@@ -24,7 +24,6 @@
   box-shadow: var(--tw-shadow);
   border-radius: var(--radius);
   height: var(--sx-calendar-calculated-height);
-
 }
 
 .sx__time-grid-event {

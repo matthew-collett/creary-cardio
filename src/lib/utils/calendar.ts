@@ -1,6 +1,6 @@
 import { CalendarEvent } from '@schedule-x/calendar'
 
-import { Booking, User } from '@/types'
+import { Booking } from '@/types'
 
 export const toScheduleXDateTime = (d: Date) => {
   const pad = (n: number) => String(n).padStart(2, '0')
@@ -24,20 +24,17 @@ export const fromScheduleXDate = (d: string): Date => {
   return date
 }
 
-export const toScheduleXEvent = (
-  booking: Booking,
-  userLookup: Map<string, User>,
-): CalendarEvent => {
-  const owner = userLookup.get(booking.userId)
-  const name = owner?.displayName ?? 'Unknown'
-
+export const toScheduleXEvent = (booking: Booking): CalendarEvent => {
   return {
-    id: booking.id!,
-    title: `${booking.title} (${name})`,
+    id: booking.id,
+    title: `${booking.title} (${booking.userDisplayName || ''})`,
     start: toScheduleXDateTime(booking.start.toDate()),
     end: toScheduleXDateTime(booking.end.toDate()),
     calendarId: booking.userId,
-    ...(booking.rrule ? { rrule: booking.rrule } : {}),
+    createdAt: booking.createdAt,
+    updatedAt: booking.updatedAt,
     ...(booking.description ? { description: booking.description } : {}),
   }
 }
+
+export const key = (booking: Booking) => `${booking.id}|${booking.updatedAt.toMillis()}`

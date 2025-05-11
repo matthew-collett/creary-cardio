@@ -3,15 +3,15 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import logo from '@/assets/logo.svg'
-import { Button, LinkButton } from '@/components/core'
-import { Alert, Card, PasswordInput, TextInput } from '@/components/core'
-import { showSuccess } from '@/components/Notification'
+import { Button, LinkButton, Alert, Card, PasswordInput, TextInput } from '@/components/core'
+import { showSuccess } from '@/components/notifications'
 import { useAuth } from '@/context'
 
 const Login = () => {
   const navigate = useNavigate()
   const [isResetMode, setIsResetMode] = useState<boolean>(false)
   const { user, login, resetPassword, actionLoading } = useAuth()
+
   const form = useForm({
     initialValues: {
       email: '',
@@ -19,7 +19,7 @@ const Login = () => {
     },
     validate: {
       email: v => (v.trim() ? null : 'Email is required'),
-      password: v => (v.trim() ? null : 'Password is required'),
+      password: v => (!isResetMode && !v.trim() ? 'Password is required' : null),
     },
   })
 
@@ -29,17 +29,18 @@ const Login = () => {
     }
   }, [user, navigate])
 
-  const handleSubmit = form.onSubmit(async vals => {
+  const handleSubmit = form.onSubmit(async ({ email, password }) => {
     if (isResetMode) {
-      const { success, error } = await resetPassword(vals.email)
+      const { success, error } = await resetPassword(email)
       if (!success) {
         form.setErrors({ form: error })
         return
       }
-
       showSuccess('Reset email sent!')
+      return
     }
-    const { success, error } = await login(vals.email, vals.password)
+
+    const { success, error } = await login(email, password)
     if (!success) {
       form.setErrors({ form: error })
       return
@@ -49,11 +50,12 @@ const Login = () => {
 
   const toggleResetMode = () => {
     setIsResetMode(!isResetMode)
+    form.clearErrors()
   }
 
   return (
     <div className="min-h-screen w-full flex items-center justify-center bg-primary py-6 px-4">
-      <Card className="w-full max-w-md bg-background">
+      <Card className="w-full max-w-md bg-white">
         <div className="flex flex-col justify-center items-center">
           <img className="w-28 sm:w-36" src={logo} alt="Creary Cardio Logo" />
           <h2 className="text-2xl font-bold text-primary text-center mt-3">
@@ -66,7 +68,6 @@ const Login = () => {
           </p>
         </div>
         <div className="py-4 sm:py-6 sm:px-6">
-          {form.errors.form && <Alert error>{form.errors.form}</Alert>}
           <form onSubmit={handleSubmit} className="space-y-4">
             <TextInput
               withAsterisk
@@ -82,6 +83,7 @@ const Login = () => {
                 {...form.getInputProps('password')}
               />
             )}
+            {form.errors.form && <Alert error>{form.errors.form}</Alert>}
             <Button type="submit" loading={actionLoading}>
               {isResetMode ? 'Send Reset Link' : 'Login'}
             </Button>

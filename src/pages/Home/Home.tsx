@@ -1,70 +1,162 @@
+import { useModalsStack } from '@mantine/core'
+import { CalendarEvent } from '@schedule-x/calendar'
 import { IconPlus, IconRefresh } from '@tabler/icons-react'
-import { useState } from 'react'
+import { Timestamp } from 'firebase/firestore'
+import { useEffect, useState } from 'react'
 import { Navigate } from 'react-router-dom'
 
-import { DefaultProfilePhoto, PageTitle } from '@/components'
-import { Calendar, ErrorCard, LoaderCard, BookingModal, ErrorModal } from '@/components/Calendar'
-import { Button } from '@/components/core'
+import {
+  Calendar,
+  ErrorCard,
+  LoaderCard,
+  BookingModal,
+  PageTitle,
+  ProfilePhoto,
+} from '@/components'
+import { Button, Modal, Tooltip } from '@/components/core'
+import { showError, showSuccess } from '@/components/notifications'
 import { useAuth } from '@/context'
 import { useBookings, useSettings, useUsers } from '@/hooks'
-import { addDays, midnight, today } from '@/lib/utils'
+import {
+  addDays,
+  fromScheduleXDate,
+  fromScheduleXDateTime,
+  midnight,
+  safeDate,
+  today,
+} from '@/lib/utils'
+import { Booking } from '@/types'
 
 const Home = () => {
   const { user } = useAuth()
   const { settings, initialLoading: sLoad } = useSettings()
-  const { users, userMap, loading: uLoad } = useUsers()
-  const { bookings, initialLoading: bLoad, actionLoading, createBooking, refetch } = useBookings()
+  const { users, loading: uLoad } = useUsers()
+  const {
+    events,
+    initialLoading: bLoad,
+    actionLoading: bActionLoad,
+    refetch,
+    getBooking,
+    validateBooking,
+    updateBooking,
+  } = useBookings()
+  const modalStack = useModalsStack(['create', 'info', 'update', 'delete', 'error'])
 
-  const loading = sLoad || uLoad || bLoad
+  const loading = sLoad || uLoad || bLoad || bActionLoad
 
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
-  const [bookingModalOpen, setBookingModalOpen] = useState(false)
-  const [errorModalOpen, setErrorModalOpen] = useState(false)
-  const [errorMessage, setErrorMessage] = useState('')
+  const [selectedEventId, setSelectedEventId] = useState<string | null>(null)
+  const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null)
+  const [errorMessage, setErrorMessage] = useState<string>('')
   const advanceBookingDays = settings?.advanceBookingDays
+
+  useEffect(() => {
+    if (selectedEventId && !bLoad) {
+      const booking = getBooking(selectedEventId)
+      if (booking) {
+        setSelectedBooking(booking)
+        modalStack.open('info')
+      }
+      setSelectedEventId(null)
+    }
+  }, [selectedEventId, bLoad, getBooking, modalStack])
 
   if (!user) {
     return <Navigate to="/login" replace />
   }
 
-  const openBookingModal = (date: Date) => {
+  const handleClickDate = (date: Date): void => {
     if (!advanceBookingDays || midnight(date) > addDays(midnight(today), advanceBookingDays)) {
       const errorMsg = advanceBookingDays
         ? `Bookings can only be made up to ${advanceBookingDays} days in advance`
         : 'Bookings can only be made up to the number of advance booking days configured in settings'
       setErrorMessage(errorMsg)
-      setErrorModalOpen(true)
+      modalStack.open('error')
       return
     }
     setSelectedDate(date)
-    setBookingModalOpen(true)
+    modalStack.open('create')
+  }
+
+  const onClickDate = (ds: string): void => handleClickDate(fromScheduleXDate(ds))
+
+  const onClickDateTime = (ds: string): void => handleClickDate(fromScheduleXDateTime(ds))
+
+  const onEventClick = (event: CalendarEvent): void => {
+    setSelectedEventId(event.id.toString())
+  }
+
+  const onEventUpdate = async (event: CalendarEvent): Promise<void> => {
+    const booking = getBooking(event.id.toString())
+    if (!booking) {
+      showError('Could not find booking to update')
+      return
+    }
+
+    const { success, error } = await updateBooking(booking.id, {
+      start: Timestamp.fromDate(safeDate(event.start)),
+      end: Timestamp.fromDate(safeDate(event.end)),
+    })
+
+    if (!success) {
+      showError(error)
+      return
+    }
+
+    showSuccess('Booking updated successfully!')
+  }
+
+  const onBeforeEventUpdate = (oldEvent: CalendarEvent, newEvent: CalendarEvent): boolean => {
+    if (oldEvent.start === newEvent.start && oldEvent.end === newEvent.end) {
+      return false
+    }
+
+    const newBooking = getBooking(newEvent.id.toString())
+    if (!newBooking) {
+      return false
+    }
+
+    ;(async () => {
+      const { success, data, error } = await validateBooking(
+        safeDate(newEvent.start),
+        safeDate(newEvent.end),
+        newBooking.id,
+      )
+
+      if (!success) {
+        showError(error)
+        return
+      }
+
+      if (!data.allowed) {
+        showError(data.reason)
+        return
+      }
+
+      onEventUpdate(newEvent)
+    })()
+
+    return false
   }
 
   return (
     <>
       <PageTitle
-        icon={
-          user.photoURL ? (
-            <img src={user.photoURL} alt="Profile Picture" />
-          ) : (
-            <DefaultProfilePhoto size={30} />
-          )
-        }
+        iconComponent={<ProfilePhoto src={user.photoURL} size={50} />}
         title={`Hi ${user.displayName}!`}
       >
         <div className="flex items-center gap-2">
-          <Button className="!w-fit" onClick={() => openBookingModal(today)}>
-            <div className="flex items-center gap-1">
+          <Tooltip label="Add" position="top">
+            <Button className="!w-fit" onClick={() => handleClickDate(today)}>
               <IconPlus size={20} />
-              <span>Add</span>
-            </div>
-          </Button>
-          <Button variant="default" className="!w-fit" onClick={refetch}>
-            <div className="flex items-center gap-1">
+            </Button>
+          </Tooltip>
+
+          <Tooltip label="Refresh" position="top">
+            <Button variant="default" className="!w-fit" onClick={refetch}>
               <IconRefresh size={20} />
-              <span>Refresh</span>
-            </div>
-          </Button>
+            </Button>
+          </Tooltip>
         </div>
       </PageTitle>
       {loading ? (
@@ -76,25 +168,76 @@ const Home = () => {
           <Calendar
             settings={settings}
             users={users}
-            userMap={userMap}
-            bookings={bookings}
-            onDateClick={date => openBookingModal(date)}
+            events={events}
+            callbacks={{
+              onClickDate,
+              onClickDateTime,
+              onEventClick,
+              onEventUpdate,
+              onBeforeEventUpdate,
+            }}
           />
 
-          <BookingModal
-            opened={bookingModalOpen}
-            onClose={() => setBookingModalOpen(false)}
-            onSubmit={async booking => await createBooking(booking)}
-            userId={user.id}
-            initialDate={selectedDate || today}
-            actionLoading={actionLoading}
-          />
+          <Modal.Stack>
+            {selectedDate && (
+              <BookingModal.Create
+                {...modalStack.register('create')}
+                key={`create-${selectedDate.getTime()}`}
+                selectedDate={selectedDate}
+                user={user}
+              />
+            )}
 
-          <ErrorModal
-            opened={errorModalOpen}
-            onClose={() => setErrorModalOpen(false)}
-            message={errorMessage}
-          />
+            {selectedBooking && (
+              <BookingModal.Info
+                {...modalStack.register('info')}
+                key={`info-${selectedBooking.id}`}
+                booking={selectedBooking}
+                user={user}
+                onClickUpdate={() => {
+                  modalStack.close('info')
+                  modalStack.open('update')
+                }}
+                onClickDelete={() => {
+                  modalStack.close('info')
+                  modalStack.open('delete')
+                }}
+              />
+            )}
+
+            {selectedBooking && (
+              <BookingModal.Update
+                {...modalStack.register('update')}
+                key={`update-${selectedBooking}`}
+                booking={selectedBooking}
+                user={user}
+                onClose={() => modalStack.close('update')}
+                onCancel={() => {
+                  modalStack.close('update')
+                  modalStack.open('info')
+                }}
+              />
+            )}
+
+            {selectedBooking && (
+              <BookingModal.Delete
+                {...modalStack.register('delete')}
+                key={`delete-${selectedBooking}`}
+                booking={selectedBooking}
+                onClose={() => modalStack.close('delete')}
+                onCancel={() => {
+                  modalStack.close('delete')
+                  modalStack.open('info')
+                }}
+              />
+            )}
+
+            <BookingModal.Error
+              {...modalStack.register('error')}
+              onClose={() => modalStack.close('error')}
+              message={errorMessage}
+            />
+          </Modal.Stack>
         </>
       )}
     </>

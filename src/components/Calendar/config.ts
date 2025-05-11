@@ -13,7 +13,7 @@ import { createDragAndDropPlugin } from '@schedule-x/drag-and-drop'
 import { createEventRecurrencePlugin } from '@schedule-x/event-recurrence'
 import { createResizePlugin } from '@schedule-x/resize'
 
-import { addDays, midnight, today, toScheduleXDate } from '@/lib/utils'
+import { addDays, formatTimeHHMM, midnight, today, toScheduleXDate } from '@/lib/utils'
 import type { Settings, User } from '@/types'
 
 export const plugins = [
@@ -23,15 +23,12 @@ export const plugins = [
   createResizePlugin(),
 ]
 
-export const makeBaseConfig = ({
-  openingTime: start,
-  closingTime: end,
-}: Settings): CalendarConfig => {
+export const makeBaseConfig = ({ openingTime, closingTime }: Settings): CalendarConfig => {
   return {
     views: [createViewDay(), createViewWeek(), createViewMonthGrid(), createViewMonthAgenda()],
     defaultView: viewWeek.name,
     firstDayOfWeek: 0,
-    dayBoundaries: { start, end },
+    dayBoundaries: { start: formatTimeHHMM(openingTime), end: formatTimeHHMM(closingTime) },
     weekOptions: { eventOverlap: false, gridHeight: 800 },
   }
 }
@@ -41,7 +38,7 @@ export const makeCalendarsConfig = (users: User[]): Record<string, CalendarType>
     (acc, u) => {
       acc[u.id] = {
         colorName: u.id,
-        lightColors: { main: u.color, container: u.color + '55', onContainer: '#000' },
+        lightColors: { main: u.color, container: u.color + '77', onContainer: '#000' },
       }
       return acc
     },

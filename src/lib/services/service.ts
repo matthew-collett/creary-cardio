@@ -16,7 +16,13 @@ import {
 
 import { db, Observable } from '@/lib'
 import { handleError } from '@/lib/utils'
-import { NewResource, Resource, ServiceResponse, UpdatedResource } from '@/types'
+import {
+  EmptyServiceResponse,
+  NewResource,
+  Resource,
+  ServiceResponse,
+  UpdatedResource,
+} from '@/types'
 
 export abstract class Service<T extends Resource> extends Observable {
   private collection: CollectionReference
@@ -37,7 +43,6 @@ export abstract class Service<T extends Resource> extends Observable {
       }
       return response
     } catch (error) {
-      console.log(error)
       return {
         success: false,
         error: handleError(error),
@@ -89,7 +94,7 @@ export abstract class Service<T extends Resource> extends Observable {
     }, true)
   }
 
-  async delete(id: string): Promise<ServiceResponse<null>> {
+  async delete(id: string): Promise<EmptyServiceResponse> {
     return this.executeOperation(async () => {
       await deleteDoc(doc(this.collection, id))
       return {

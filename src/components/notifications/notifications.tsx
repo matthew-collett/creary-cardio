@@ -1,5 +1,5 @@
 import { notifications } from '@mantine/notifications'
-import { IconCheck, IconX, IconInfoCircle } from '@tabler/icons-react'
+import { IconCheck, IconInfoCircle, IconExclamationCircle } from '@tabler/icons-react'
 
 export type NotificationType = 'success' | 'error' | 'info'
 
@@ -24,15 +24,15 @@ export const showNotification = (message: string, type: NotificationType = 'succ
 
   const colors = colorMap[type]
 
-  const iconMap = {
+  const icons = {
     success: <IconCheck />,
-    error: <IconX />,
+    error: <IconExclamationCircle />,
     info: <IconInfoCircle />,
   }
 
   notifications.show({
     message,
-    icon: iconMap[type],
+    icon: icons[type],
     withBorder: true,
     autoClose: 5000,
     styles: {

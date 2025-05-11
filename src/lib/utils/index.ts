@@ -1,3 +1,3 @@
 export * from './errors'
-export * from './scheduleX'
+export * from './calendar'
 export * from './time'

@@ -1,17 +1,20 @@
+import { TablerIcon } from '@tabler/icons-react'
 import { ReactNode } from 'react'
 
 export const PageTitle = ({
   children,
-  icon,
+  icon: Icon,
+  iconComponent,
   title,
 }: {
   children?: ReactNode
-  icon: ReactNode
+  icon?: TablerIcon
+  iconComponent?: ReactNode
   title: string
 }) => (
-  <div className="flex justify-between items-center max-sm:flex-col py-4 gap-2">
+  <div className="flex justify-between items-center py-4 gap-2">
     <div className="flex items-center gap-2 max-sm:text-2xl text-4xl font-light">
-      {icon}
+      {Icon ? <Icon size="1.25em" /> : iconComponent}
       <span>{title}</span>
     </div>
     {children}

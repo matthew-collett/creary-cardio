@@ -2,32 +2,65 @@ import {
   sendPasswordResetEmail,
   signInWithEmailAndPassword,
   signOut,
-  UserCredential,
-} from '@firebase/auth'
+  updatePassword,
+  User,
+} from 'firebase/auth'
 
 import { auth } from '@/lib'
 import { handleError } from '@/lib/utils'
-import { ServiceResponse } from '@/types'
+import { EmptyServiceResponse, ServiceResponse } from '@/types'
 
-export class AuthService {
-  executeOperation = async (
-    operation: () => Promise<void> | Promise<UserCredential>,
-  ): Promise<ServiceResponse<null>> => {
+class AuthService {
+  private executeOperation = async <R>(
+    operation: () => Promise<ServiceResponse<R>>,
+  ): Promise<ServiceResponse<R>> => {
     try {
-      await operation()
-      return { success: true, data: null }
+      return await operation()
     } catch (error) {
       return { success: false, error: handleError(error) }
     }
   }
 
-  login = async (email: string, password: string) =>
-    this.executeOperation(() => signInWithEmailAndPassword(auth, email, password))
+  login = async (email: string, password: string): Promise<ServiceResponse<User>> =>
+    this.executeOperation(async () => {
+      const { user } = await signInWithEmailAndPassword(auth, email, password)
+      return {
+        success: true,
+        data: user,
+      }
+    })
 
-  logout = async () => this.executeOperation(() => signOut(auth))
+  logout = async (): Promise<EmptyServiceResponse> =>
+    this.executeOperation(async () => {
+      await signOut(auth)
+      return {
+        success: true,
+        data: null,
+      }
+    })
 
-  resetPassword = async (email: string) =>
-    this.executeOperation(() => sendPasswordResetEmail(auth, email))
+  resetPassword = async (email: string): Promise<EmptyServiceResponse> =>
+    this.executeOperation(async () => {
+      await sendPasswordResetEmail(auth, email)
+      return {
+        success: true,
+        data: null,
+      }
+    })
+
+  changePassword = async (
+    email: string,
+    currentPassword: string,
+    newPassword: string,
+  ): Promise<EmptyServiceResponse> =>
+    this.executeOperation(async () => {
+      const { user } = await signInWithEmailAndPassword(auth, email, currentPassword)
+      await updatePassword(user, newPassword)
+      return {
+        success: true,
+        data: null,
+      }
+    })
 }
 
 export const authService = new AuthService()

@@ -31,6 +31,7 @@
   --color-text: #333333;
   --color-text-light: var(--color-background);
   --color-border: #ced4db;
+  --color-white: #fafafa;
 
   --radius: 24px;
 }
@@ -69,6 +70,7 @@
   --color-text: var(--color-text);
   --color-text-light: var(--color-text-light);
   --color-border: var(--color-border);
+  --color-white: var(--color-white);
 
   --radius-radius: var(--radius);
 }

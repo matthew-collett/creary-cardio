@@ -10,8 +10,6 @@ export type Settings = Resource & {
 export type IsAllowed = { allowed: true } | { allowed: false; reason: string }
 
 /* TODO
-- be able to update and delete bookings
-- make account page
 --- need to do update password, also custom password reset form with cool redirect in 3. 2. 1....
 - add other users
 - deploy

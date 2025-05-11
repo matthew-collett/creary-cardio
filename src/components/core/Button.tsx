@@ -1,20 +1,28 @@
-import { Button as MantineButton, ButtonProps, ElementProps } from '@mantine/core'
-import { ButtonHTMLAttributes, ReactNode } from 'react'
+import {
+  Button as MantineButton,
+  ButtonProps as MantineButtonProps,
+  ElementProps,
+} from '@mantine/core'
+import { ButtonHTMLAttributes, forwardRef, ReactNode } from 'react'
 
-type ExtendedButtonProps = ButtonProps & ElementProps<'button', keyof ButtonProps>
+type ButtonProps = MantineButtonProps & ElementProps<'button', keyof MantineButtonProps>
 
-export const Button = (props: ExtendedButtonProps) => (
-  <MantineButton {...props} radius="var(--radius)" color="primary" size="md" fullWidth />
-)
+export const Button = forwardRef<HTMLButtonElement, ButtonProps>((props, ref) => (
+  <MantineButton {...props} radius="var(--radius)" size="md" fullWidth ref={ref} />
+))
 
-export const LinkButton = ({
-  children,
-  ...props
-}: ButtonHTMLAttributes<HTMLButtonElement> & { children: ReactNode }) => (
+Button.displayName = 'Button'
+
+type LinkButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & { children: ReactNode }
+
+export const LinkButton = forwardRef<HTMLButtonElement, LinkButtonProps>((props, ref) => (
   <button
     {...props}
-    className="text-primary underline hover:cursor-pointer hover:text-accent transition-all duration-200"
+    ref={ref}
+    className="text-primary underline hover:cursor-pointer hover:text-accent transition-all duration-100"
   >
-    {children}
+    {props.children}
   </button>
-)
+))
+
+LinkButton.displayName = 'LinkButton'

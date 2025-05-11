@@ -9,3 +9,5 @@ export interface Resource {
 export type NewResource<T extends Resource> = Omit<T, 'id' | 'createdAt' | 'updatedAt'>
 
 export type UpdatedResource<T extends Resource> = Partial<NewResource<T>>
+
+export type NewOrUpdatedResource<T extends Resource> = NewResource<T> | UpdatedResource<T>

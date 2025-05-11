@@ -1,17 +1,19 @@
 import { Service } from '@/lib/services'
-import { dateToMinutes, timeToMinutes, formatTime12, addDays, midnight, today } from '@/lib/utils'
-import { IsAllowed, Settings, UpdatedResource } from '@/types'
+import { dateToMinutes, timeToMinutes, addDays, midnight, today, formatTime12 } from '@/lib/utils'
+import { IsAllowed, ServiceResponse, Settings, UpdatedResource } from '@/types'
 
 class SettingsService extends Service<Settings> {
   constructor() {
     super('settings')
   }
 
-  getSettings = async () => super.get('calendar')
+  getSettings = async (): Promise<ServiceResponse<Settings>> => this.get('calendar')
 
-  updateSettings = async (settings: UpdatedResource<Settings>) => this.update('calendar', settings)
+  updateSettings = async (
+    settings: UpdatedResource<Settings>,
+  ): Promise<ServiceResponse<Settings>> => this.update('calendar', settings)
 
-  isBookingAllowed = async (start: Date, end: Date) =>
+  isBookingAllowed = async (start: Date, end: Date): Promise<ServiceResponse<IsAllowed>> =>
     this.executeOperation<IsAllowed>(async () => {
       const settingsResponse = await this.getSettings()
       if (!settingsResponse.success) {

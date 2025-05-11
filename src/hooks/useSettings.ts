@@ -11,24 +11,29 @@ export const useSettings = () => {
   useEffect(() => {
     const fetchSettings = async () => {
       setInitialLoading(true)
-      const { success, data } = await settingsService.getSettings()
-      if (success) {
-        setSettings(data)
+      try {
+        const { success, data } = await settingsService.getSettings()
+        if (success) {
+          setSettings(data)
+        }
+      } finally {
+        setInitialLoading(false)
       }
-      setInitialLoading(false)
     }
-
     fetchSettings()
   }, [])
 
   const updateSettings = async (settings: UpdatedResource<Settings>) => {
     setActionLoading(true)
-    const response = await settingsService.updateSettings(settings)
-    if (response.success) {
-      setSettings(response.data)
+    try {
+      const response = await settingsService.updateSettings(settings)
+      if (response.success) {
+        setSettings(response.data)
+      }
+      return response
+    } finally {
+      setActionLoading(false)
     }
-    setActionLoading(false)
-    return response
   }
 
   return {

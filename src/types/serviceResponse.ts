@@ -11,3 +11,5 @@ export type ErrorResponse = {
 }
 
 export type ServiceResponse<T> = SuccessResponse<T> | ErrorResponse
+
+export type EmptyServiceResponse = ServiceResponse<null>

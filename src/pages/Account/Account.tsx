@@ -103,13 +103,7 @@ const Account = () => {
       <div className="space-y-6 pb-6">
         <Card className="flex flex-col items-center bg-white space-y-4">
           <div className="flex flex-col space-y-1 items-center">
-            <ProfilePhoto
-              className="cursor-pointer"
-              src={user.photoURL}
-              size={120}
-              applyHover
-              onClick={open}
-            />
+            <ProfilePhoto className="cursor-pointer" size="2xl" applyHover onClick={open} />
             <h3 className="text-2xl font-semibold">{user.displayName || 'User'}</h3>
             <p className="text-gray-600">{user.email}</p>
             {user.isAdmin && <Badge className="!mt-2">Admin</Badge>}

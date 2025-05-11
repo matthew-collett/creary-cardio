@@ -141,10 +141,7 @@ const Home = () => {
 
   return (
     <>
-      <PageTitle
-        iconComponent={<ProfilePhoto src={user.photoURL} size={50} />}
-        title={`Hi ${user.displayName}!`}
-      >
+      <PageTitle iconComponent={<ProfilePhoto size="md" />} title={`Hi ${user.displayName}!`}>
         <div className="flex items-center gap-2">
           <Tooltip label="Add" position="top">
             <Button className="!w-fit" onClick={() => handleClickDate(today)}>

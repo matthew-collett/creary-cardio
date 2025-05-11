@@ -23,6 +23,11 @@ const publicRoutes: Route[] = [
     path: '*',
     component: () => import('@/pages/NotFound'),
   },
+  {
+    title: 'Auth Action',
+    path: 'auth/action',
+    component: () => import('@/pages/AuthAction'),
+  },
 ]
 
 const navRoutes: AppRoute[] = [

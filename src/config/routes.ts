@@ -24,7 +24,7 @@ const publicRoutes: Route[] = [
     component: () => import('@/pages/NotFound'),
   },
   {
-    title: 'Auth Action',
+    title: 'Authentication Action',
     path: 'auth/action',
     component: () => import('@/pages/AuthAction'),
   },
@@ -54,26 +54,25 @@ const protectedRoutes: Route[] = [
   },
 ]
 
-export const routes = [...publicRoutes, ...protectedRoutes, ...navRoutes]
+const routes = [...publicRoutes, ...protectedRoutes, ...navRoutes]
 
-export const getTitle = (location: Location): string | undefined => {
-  return getRoute(location)?.title
-}
+export const getTitle = (location: Location): string => getRoute(location).title
 
-export const isActiveRoute = (path: string, location: Location): boolean => {
-  return location.pathname.split('/')[1] === path
-}
+export const isActiveRoute = (path: string, location: Location): boolean =>
+  (location.pathname.slice(1) || '') === path || location.pathname.startsWith(`/${path}/`)
 
-export const getRoute = (location: Location): Route | undefined => {
+export const getRoute = (location: Location): Route => {
+  const pathname = location.pathname.slice(1) || ''
   return (
-    routes.find(r => r.path === location.pathname.split('/')[1]) ||
-    publicRoutes.find(r => r.path === '*')
+    routes.find(route => pathname === route.path || pathname.startsWith(`${route.path}/`)) ||
+    publicRoutes.find(r => r.path === '*')!
   )
 }
+
 export const createRouteConfig = (route: Route): RouteObject => ({
   path: route.path,
   lazy: route.component,
 })
 
 export type { Route, AppRoute }
-export { protectedRoutes, publicRoutes, navRoutes }
+export { protectedRoutes, publicRoutes, navRoutes, routes }

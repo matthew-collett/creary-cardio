@@ -243,7 +243,7 @@ export const BookingModal = {
       <Modal.Body>
         <div className="space-y-4">
           <div className="flex items-center gap-3 pb-3 border-b-2 border-gray-200">
-            <ProfilePhoto src={user.photoURL} size={50} />
+            <ProfilePhoto size="md" />
             <div>
               <div className="text-sm text-gray-500">Runner</div>
               <div className="font-medium">{booking.userDisplayName}</div>

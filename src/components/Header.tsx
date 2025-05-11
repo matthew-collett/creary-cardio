@@ -28,7 +28,7 @@ export const Header = () => {
   }
 
   return (
-    <div className="w-full flex justify-end items-center gap-8 max-md:mt-4 h-header">
+    <div className="w-full flex justify-end items-center gap-8 h-header">
       <Tooltip
         classNames={{ tooltip: '!text-xs' }}
         label="Past Bookings"

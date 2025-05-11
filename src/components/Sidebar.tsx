@@ -72,7 +72,7 @@ export const Sidebar = () => {
         <button
           onClick={toggleMobileMenu}
           className={twMerge(
-            'text-background fixed top-4 right-4 z-50 p-2 bg-accent rounded-radius transform transition-all duration-200',
+            'text-background fixed bottom-4 right-4 z-50 p-2 bg-accent rounded-radius transform transition-all duration-200',
             isMobileMenuOpen ? 'rotate-90' : 'rotate-0',
           )}
         >

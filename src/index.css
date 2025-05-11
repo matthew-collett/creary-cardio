@@ -105,12 +105,12 @@
   }
 
   body {
-    min-height: 100vh;
+    min-height: 100dvh;
     text-rendering: optimizeSpeed;
     line-height: 1.5;
     font-family: var(--font-primary);
     color: var(--color-text);
-    background-color: var(--color-background);
+    background-color: var(--color-primary);
   }
 
   img,

@@ -34,6 +34,9 @@
   --color-white: #fafafa;
 
   --radius: 24px;
+  --height-header: 24.8px;
+  --height-page-title: 80px;
+  --height-page-title-sm: 122px;
 }
 
 @theme {
@@ -73,6 +76,10 @@
   --color-white: var(--color-white);
 
   --radius-radius: var(--radius);
+
+  --height-header: var(--height-header);
+  --height-page-title: var(--height-page-title);
+  --height-page-title-sm: var(--height-page-title-sm);
 }
 
 @layer base {

@@ -7,9 +7,13 @@
   --sx-rounding-small: var(--radius);
   --sx-rounding-extra-small: var(--radius);
   /* 100vh - xy padding above card - xy padding below card - header - page title */
-  --sx-calendar-calculated-height: calc(100dvh - 48px - 32px - var(--height-header) - var(--height-page-title));
+  --sx-calendar-calculated-height: calc(
+    100svh - 48px - 32px - var(--height-header) - var(--height-page-title)
+  );
   /* 100vh - xy padding above card - xy padding below card - header - mobile margin - page title */
-  --sx-calendar-calculated-height-sm: calc(100dvh - 48px - 32px - var(--height-header) - 16px - var(--height-page-title-sm));
+  --sx-calendar-calculated-height-sm: calc(
+    100svh - 48px - 32px - var(--height-header) - 16px - var(--height-page-title-sm)
+  );
 }
 
 .sx__calendar-wrapper {
